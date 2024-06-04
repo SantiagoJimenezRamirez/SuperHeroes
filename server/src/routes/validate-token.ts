@@ -11,8 +11,6 @@ const validateToken = (req:Request, res:Response, next: NextFunction)=>{
             //SecretKey
             const secretKey : any = process.env.KEY;
             
-            //console.log(bearerToken);
-            
             jwt.verify(bearerToken, secretKey)
     
             next();

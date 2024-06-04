@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteHeroeById = exports.addHeroes = exports.editHeroeByName = exports.getHeroeByName = exports.getAllsHeroes = void 0;
+exports.deleteHeroeById = exports.addHeroes = exports.editHeroe = exports.getHeroeByName = exports.getAllsHeroes = void 0;
 const heroes_1 = require("../models/heroes");
 const getAllsHeroes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const listHeroes = yield heroes_1.Heroe.findAll();
@@ -38,32 +38,34 @@ const getHeroeByName = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getHeroeByName = getHeroeByName;
-const editHeroeByName = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name } = req.params;
-    const { newName, description } = req.body;
+const editHeroe = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const { name, description } = req.body;
+    // Validate if the hero exists in the database
+    const heroe = yield heroes_1.Heroe.findByPk(id);
+    if (!heroe) {
+        return res.status(404).json({
+            msg: `Heroe with ID ${id} not found`
+        });
+    }
+    // Update the hero
     try {
-        // Buscar el héroe en la base de datos por nombre
-        const heroe = yield heroes_1.Heroe.findOne({ where: { name: name } });
-        if (!heroe) {
-            return res.status(404).json({
-                msg: `Heroe with name ${name} does not exist in Database`
-            });
-        }
-        // Actualizar el nombre y la descripción del héroe
-        yield heroe.update({ name: newName, description: description });
+        yield heroe.update({
+            name,
+            description
+        });
         res.json({
-            msg: `Heroe ${name} updated successfully`,
-            heroe
+            msg: `Heroe with ID ${id} updated successfully`
         });
     }
     catch (error) {
         res.status(400).json({
-            msg: "Oops, something went wrong: ",
+            msg: "Oops something went wrong: ",
             error
         });
     }
 });
-exports.editHeroeByName = editHeroeByName;
+exports.editHeroe = editHeroe;
 const addHeroes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, description } = req.body;
     //Validate if it exists in the database

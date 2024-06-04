@@ -8,59 +8,37 @@ export const getAllsHeroes = async (req:Request, res:Response)=>{
     res.json(listHeroes);
 }
 
-export const getHeroeByName = async (req: Request, res: Response) => {
-    const { name } = req.params;
 
-    try {
-        // Buscar el héroe en la base de datos por nombre
-        const heroe = await Heroe.findOne({ where: { name: name } });
-
-        if (!heroe) {
-            return res.status(404).json({
-                msg: `Heroe with name ${name} does not exist in Database`
-            });
-        }
-
-        res.json({
-            heroe
-        });
-    } catch (error) {
-        res.status(400).json({
-            msg: "Oops, something went wrong: ",
-            error
-        });
+export const editHeroe = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { name, description } = req.body;
+  
+    // Validate if the hero exists in the database
+    const heroe = await Heroe.findByPk(id);
+  
+    if (!heroe) {
+      return res.status(404).json({
+        msg: `Heroe with ID ${id} not found`
+      });
     }
-}
-
-export const editHeroeByName = async (req: Request, res: Response) => {
-    const { name } = req.params;
-    const { newName, description } = req.body;
-
+  
+    // Update the hero
     try {
-        // Buscar el héroe en la base de datos por nombre
-        const heroe = await Heroe.findOne({ where: { name: name } });
-
-        if (!heroe) {
-            return res.status(404).json({
-                msg: `Heroe with name ${name} does not exist in Database`
-            });
-        }
-
-        // Actualizar el nombre y la descripción del héroe
-        await heroe.update({ name: newName, description : description });
-
-        res.json({
-            msg: `Heroe ${name} updated successfully`,
-            heroe
-        });
+      await heroe.update({
+        name,
+        description
+      });
+  
+      res.json({
+        msg: `Heroe with ID ${id} updated successfully`
+      });
     } catch (error) {
-        res.status(400).json({
-            msg: "Oops, something went wrong: ",
-            error
-        });
+      res.status(400).json({
+        msg: "Oops something went wrong: ",
+        error
+      });
     }
-}
-
+  }
 
 export const addHeroes = async (req: Request, res: Response) => {
     const { name, description } = req.body;
@@ -78,7 +56,6 @@ export const addHeroes = async (req: Request, res: Response) => {
                 name : name,
                 description : description
             })
-        
             res.json({
                 msg: `User ${name} creted susecsfull`
             })

@@ -42,32 +42,45 @@ export const newUser = async (req:Request, res:Response) => {
     }
 }
 
-export const loginUser = async (req:Request, res:Response) => {
-    
+async function getUserByUsername(username : string) {
+  try {
+    const user = await User.findOne({ where: { username } });
+    return user;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+export const loginUser = async (req: Request, res: Response) => {
     const { username, password } = req.body;
 
-    //Validate if it exists in the database
-    const user: any = await User.findOne({ where: { username: username } }); 
-    if(!user){
+    const user: any = await User.findOne({ where: { username: username } });
+    if (!user) {
         return res.status(400).json({
-            msg: `A user named ${username} was not found in the database`
-        })
+            msg: `No se encontró un usuario llamado ${username} en la base de datos`
+        });
     }
-    //Check if the password is the same
-    const validPassword = await bcrypt.compare(password, user.password)
-    if (!validPassword){
-        return res.status(400).json({
-            msg : "Invalid Password "
-        })
-    }
-    //Generar token
-    const secretKey : any = process.env.KEY;
-    const token = jwt.sign({ username: username }, secretKey, {
-        expiresIn : '3600000'
-    });
 
-    res.json({token});
-}
+    //Check if the password is the same
+    const validPassword = await bcrypt.compare(password, user.password);
+
+    if (!validPassword) {
+        return res.status(400).json({
+            msg: "Contraseña inválida"
+        });
+    }
+
+    // Generate token
+    const secretKey: any = process.env.KEY;
+    const token = jwt.sign(
+        { username: username, rol: user.rol },
+        secretKey,
+        { expiresIn: '3600000' }
+    );
+
+    res.json({ token });
+};
 
 export const forgotPassword = async (req: Request, res: Response) => {
     const { email } = req.body;
